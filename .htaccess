@@ -1,0 +1,47 @@
+Options +FollowSymLinks
+RewriteEngine on
+#RewriteCond %{HTTPS} off
+#RewriteRule (.*) https://%{SERVER_NAME}/$1 [R,L]
+RewriteBase /proyecto_2/
+
+Options -Indexes
+
+#RESTRINCIONES QUERY
+RewriteCond %{QUERY_STRING} (;|<|>|’|”|\)|%0A|%0D|%22|%27|%3C|%3E|%00).*(/\*|union|select|insert|cast|set|declare|drop|update|md5|benchmark) [NC,OR]
+RewriteCond %{QUERY_STRING} \.\./\.\. [OR]
+#RewriteCond %{QUERY_STRING} (localhost|loopback|127\.0\.0\.1) [NC,OR]
+RewriteCond %{QUERY_STRING} \.[a-z0-9] [NC,OR]
+RewriteCond %{QUERY_STRING} (<|>|’|%0A|%0D|%27|%3C|%3E|%00) [NC]
+
+#PETICIONES EXTERNAS
+RewriteCond %{HTTP_USER_AGENT} ^$ [OR]
+RewriteCond %{HTTP_USER_AGENT} ^(java|curl|wget) [NC,OR]
+RewriteCond %{HTTP_USER_AGENT} (winhttp|HTTrack|clshttp|archiver|loader|email|harvest|extract|grab|miner) [NC,OR]
+RewriteCond %{HTTP_USER_AGENT} (libwww-perl|curl|wget|python|nikto|scan) [NC,OR]
+RewriteCond %{HTTP_USER_AGENT} (<|>|’|%0A|%0D|%27|%3C|%3E|%00) [NC]
+
+
+RewriteRule ^(app|formatos|lenguaje|perfiles_img|socket)/ - [F]
+
+#REFERENTE
+RewriteRule ^ref=(.+)$ index.php?id=$1 [L]
+RewriteRule recuperar-clave$ recover.php?id=$1 [L]
+
+#CONFIGURACION GENERAL SERVIDOR
+#ErrorDocument 404 http://192.168.1.80/proyecto_2/web_error/404.html
+
+#RESTRINCCIONES
+RewriteRule ^inicio/restringido$ web_error/restringido.html [L]  
+ 
+
+#INICIO
+RewriteRule ^principal$ inicio/publico/dashboard.php [L]
+RewriteRule ^login$ inicio/publico/iniciar_sesion.php [L]
+RewriteRule ^crear-productos$ inicio/admin/productos_crear.php [L] 
+RewriteRule ^crear-categorias$ inicio/admin/categorias_lista.php [L] 
+RewriteRule ^editar-producto-(.+)$ inicio/admin/productos_editar.php?id=$1 [L] 
+ 
+<IfModule mod_headers.c>
+  Header set X-XSS-Protection "1; mode=block"
+  #Header set Access-Control-Allow-Origin "*"
+</IfModule>
